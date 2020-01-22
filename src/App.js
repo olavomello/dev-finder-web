@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import api from './services/api';
+
+// CSS
 import "./global.css";
 import "./app.css";
 import "./sidebar.css";
@@ -19,12 +22,12 @@ function App() {
         setLongitude(longitude);
       },
       (err) => {
-          console.log(err);
+          console.warn(err);
       },
       {
         timeout:30000,
       }
-    )
+    );
   }, [] );
 
 
@@ -32,14 +35,21 @@ function App() {
   async function handleAddDev(e){
     e.preventDefault();
 
-    
+    const response = await api.post("/devs",{
+      github_username,
+      techs,
+      lat : latitude,
+      long : longitude
+    });
+    console.log(response.data);
+  
   }
 
   return (
     <div id="app">
       <aside>
         <strong>Cadastrar</strong>
-        <form>
+        <form onSubmit={handleAddDev}>
           <div className="input-block">
             <label htmlFor="github_username">Usuário do Github</label>
             <input 
@@ -100,7 +110,7 @@ function App() {
                 <strong>Olavo Mello</strong>
                 <span>ReactJS, React Native, Node.js</span>
                 <p>Bio do usuario</p>
-                <a href="">Acessar perfil no Github</a>
+                <a href="http://www.google.com.br">Acessar perfil no Github</a>
               </div>
             </header>
           </li>
@@ -111,7 +121,7 @@ function App() {
                 <strong>Olavo Mello</strong>
                 <span>ReactJS, React Native, Node.js</span>
                 <p>Bio do usuario</p>
-                <a href="">Acessar perfil no Github</a>
+                <a href="http://www.google.com.br">Acessar perfil no Github</a>
               </div>
             </header>
           </li>          
