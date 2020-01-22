@@ -7,124 +7,40 @@ import "./app.css";
 import "./sidebar.css";
 import "./main.css";
 
+// Components
+import DevForm from "./components/DevForm";
+import DevItem from "./components/DevItem";
+
 function App() {
-  const [ github_username, setGithubUsername ] = useState("");
-  const [ techs, setTechs ] = useState("");
-  const [ latitude, setLatitude ] = useState("");
-  const [ longitude, setLongitude ] = useState("");
+  const [ devs, setDevs ] = useState([]);
 
-  useEffect( () => {
-    navigator.geolocation.getCurrentPosition(
-      (position) =>{
-        const { latitude, longitude } = position.coords;
-
-        setLatitude(latitude);
-        setLongitude(longitude);
-      },
-      (err) => {
-          console.warn(err);
-      },
-      {
-        timeout:30000,
-      }
-    );
-  }, [] );
-
+  // Load stored Devs
+  async function loadDevs(){
+    const response = await api.get("/devs");
+    setDevs(response.data);
+  }
+  useEffect(()=>{
+    loadDevs();
+  },[]);
 
   // Submit
-  async function handleAddDev(e){
-    e.preventDefault();
-
-    const response = await api.post("/devs",{
-      github_username,
-      techs,
-      lat : latitude,
-      long : longitude
-    });
-    console.log(response.data);
-  
+  async function handleAddDev( data ){
+    await api.post("/devs",data);
+    // Reload Devs
+    loadDevs();
   }
 
   return (
     <div id="app">
       <aside>
         <strong>Cadastrar</strong>
-        <form onSubmit={handleAddDev}>
-          <div className="input-block">
-            <label htmlFor="github_username">Usuário do Github</label>
-            <input 
-              name="github_username" 
-              id="github_username" 
-              required
-              value={github_username}
-              onChange={e => setGithubUsername(e.target.value)}
-            />
-          </div>
-          <div className="input-block">
-            <label htmlFor="techs">Tecnologias</label>
-            <input 
-              name="techs" 
-              id="techs" 
-              required
-              value={techs}
-              onChange={e => setTechs(e.target.value)}
-            />
-          </div>
-          <div className="input-block">
-            <div className="input-group">
-              <div className="input-block">
-                <label htmlFor="latitude">Latitude</label>
-                <input 
-                  type="number"
-                  name="latitude" 
-                  id="latitude" 
-                  value={latitude} 
-                  required 
-                  onChange={e => setLatitude(e.target.value)}
-                />              
-              </div>
-              <div className="input-block">
-                <label htmlFor="longitude">Longitude</label>
-                <input 
-                  type="number"
-                  name="longitude" 
-                  id="longitude" 
-                  value={longitude} 
-                  required 
-                  onChange={e => setLongitude(e.target.value)}
-                />           
-              </div>              
-            </div>
-            </div>
-          <div className="input-block">
-            <button type="submit">Salvar</button> 
-          </div>                 
-        </form>
+        <DevForm onSubmit={handleAddDev}/>
       </aside>
       <main>
         <ul>
-          <li className="dev-item">
-            <header>
-              <img src="https://avatars1.githubusercontent.com/u/640081?s=120&v=4" alt="Olavo Mello"/>
-              <div className="user-info">
-                <strong>Olavo Mello</strong>
-                <span>ReactJS, React Native, Node.js</span>
-                <p>Bio do usuario</p>
-                <a href="http://www.google.com.br">Acessar perfil no Github</a>
-              </div>
-            </header>
-          </li>
-          <li className="dev-item">
-            <header>
-              <img src="https://avatars1.githubusercontent.com/u/640081?s=120&v=4" alt="Olavo Mello"/>
-              <div className="user-info">
-                <strong>Olavo Mello</strong>
-                <span>ReactJS, React Native, Node.js</span>
-                <p>Bio do usuario</p>
-                <a href="http://www.google.com.br">Acessar perfil no Github</a>
-              </div>
-            </header>
-          </li>          
+          {devs.map( dev => (
+            <DevItem key={dev._id} dev={dev} />        
+          ))}          
         </ul>
       </main>
     </div>
